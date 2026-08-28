@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6d4aff">
+<meta name="description" content="Liste d'achats Carrelage Salle de Bain">
+<link rel="manifest" href="manifest.json">
+<title>Liste d'Achats — Carrelage Salle de Bain</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    padding: 20px;
+  }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 5px; }
+  .subtitle { text-align: center; color: #6e6e73; font-size: 14px; margin-bottom: 25px; }
+  .toolbar { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .toolbar button { background: #6d4aff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+  .toolbar button:hover { opacity: 0.85; }
+  .toolbar button.add { background: #34c759; }
+  .toolbar button.del { background: #ff3b30; }
+  .toolbar button.reset { background: #8e8e93; }
+  .table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+  table { width: 100%; border-collapse: collapse; min-width: 800px; }
+  th { background: #6d4aff; color: white; padding: 12px 10px; text-align: left; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+  td { padding: 8px 10px; border-bottom: 1px solid #e5e5ea; font-size: 14px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) { background: #fafafa; }
+  tr:hover { background: #f0eff6; }
+  td[contenteditable="true"]:focus { outline: 2px solid #6d4aff; outline-offset: -2px; background: #fff; }
+  td.check-cell { text-align: center; width: 50px; }
+  td.check-cell input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #6d4aff; }
+  tr.checked td { opacity: 0.45; text-decoration: line-through; }
+  td.price-cell input { width: 80px; border: 1px solid #d1d1d6; border-radius: 6px; padding: 4px 6px; font-size: 14px; }
+  td.price-cell input:focus { outline: none; border-color: #6d4aff; }
+  .total-row td { font-weight: 700; font-size: 16px; background: #ede9fe; border-top: 2px solid #6d4aff; }
+  .total-price { color: #6d4aff; font-size: 18px; }
+  .btn-delete-row { background: none; border: none; color: #ff3b30; font-size: 18px; cursor: pointer; opacity: 0.5; }
+  .btn-delete-row:hover { opacity: 1; }
+  .save-indicator { position: fixed; bottom: 20px; right: 20px; background: #34c759; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+  .save-indicator.show { opacity: 1; }
+  @media (max-width: 600px) { body { padding: 10px; } th, td { font-size: 12px; padding: 6px 4px; } }
+</style>
+</head>
+<body>
+
+<h1>📋 Liste d'Achats — Carrelage Salle de Bain</h1>
+<p class="subtitle">Cliquez sur une cellule pour la modifier • Cochez les articles achetés • Sauvegarde automatique</p>
+
+<div class="toolbar">
+  <button onclick="addRow()" class="add">➕ Ajouter une ligne</button>
+  <button onclick="exportCSV()">💾 Exporter en CSV</button>
+  <button onclick="window.print()">🖨️ Imprimer</button>
+  <button onclick="resetItems()" class="reset">↺ Réinitialiser</button>
+</div>
+
+<div class="table-container">
+  <table id="shoppingTable">
+    <thead>
+      <tr>
+        <th style="width:35px;">✓</th>
+        <th>Nom</th>
+        <th>Dimension</th>
+        <th style="width:90px;">Quantité</th>
+        <th style="width:100px;">Prix (€)</th>
+        <th>Observation</th>
+        <th>Remarque</th>
+        <th style="width:35px;"></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+    <tfoot>
+      <tr class="total-row">
+        <td colspan="4" style="text-align:right;">TOTAL :</td>
+        <td class="total-price" id="totalPrice">0 €</td>
+        <td colspan="3"></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="save-indicator" id="saveIndicator">💾 Sauvegardé</div>
+
+<script>
+const DEFAULT_ITEMS = [
+  { checked: false, nom: "Carrelage sol 30×60", dim: "30×60 cm", qte: "50 carreaux", prix: "", obs: "Lot identique — vérifier teinte avant pose", rem: "Surface 9,00 m² — waste 10%" },
+  { checked: false, nom: "Carrelage mur douche 30×60", dim: "30×60 cm", qte: "38 carreaux", prix: "", obs: "Vérifier cohérence teinte avec sol", rem: "Surface 6,84 m² — waste 15%" },
+  { checked: false, nom: "Colle C2TE S1 flexible", dim: "Sac 25 kg", qte: "3 sacs", prix: "", obs: "Classe C2TE S1 obligatoire zone humide", rem: "~5 kg/m² — conso. 13,72 m² total" },
+  { checked: false, nom: "Joint hydrofuge", dim: "5 kg + 2 kg", qte: "7 kg", prix: "", obs: "Résistant moisissures — couleur au choix", rem: "Joint 2-3 mm — ~0,4 kg/m²" },
+  { checked: false, nom: "Enduit imperméabilisation", dim: "Kit 5 kg", qte: "1 kit", prix: "", obs: "2 couches — sol + remontée murs 10 cm", rem: "Surface à étancher ~1,72 m²" },
+  { checked: false, nom: "Bande renfort angle interne", dim: "~30×30 cm", qte: "2 pièces", prix: "", obs: "À noyer dans 1ʳᵉ couche enduit", rem: "Pour les 2 angles internes du coin douche" },
+  { checked: false, nom: "Profilé U fixation paroi", dim: "2 m", qte: "1 barre", prix: "", obs: "Vérifier épaisseur verre (8 ou 10 mm)", rem: "Paroi 140×200 cm — à sceller avant carrelage" }
+];
+
+let items = JSON.parse(localStorage.getItem('sdb_items')) || JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+
+function saveItems() {
+  localStorage.setItem('sdb_items', JSON.stringify(items));
+  showSaveIndicator();
+}
+
+function showSaveIndicator() {
+  const indicator = document.getElementById('saveIndicator');
+  indicator.classList.add('show');
+  clearTimeout(showSaveIndicator._timer);
+  showSaveIndicator._timer = setTimeout(() => { indicator.classList.remove('show'); }, 1200);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  items.forEach((item, i) => {
+    const tr = document.createElement('tr');
+    if (item.checked) tr.classList.add('checked');
+
+    const tdCheck = document.createElement('td'); tdCheck.className = 'check-cell';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = item.checked;
+    cb.addEventListener('change', () => { item.checked = cb.checked; saveItems(); renderTable(); });
+    tdCheck.appendChild(cb); tr.appendChild(tdCheck);
+
+    const tdNom = document.createElement('td'); tdNom.contentEditable = true; tdNom.textContent = item.nom;
+    tdNom.addEventListener('input', () => { item.nom = tdNom.textContent; saveItems(); });
+    tr.appendChild(tdNom);
+
+    const tdDim = document.createElement('td'); tdDim.contentEditable = true; tdDim.textContent = item.dim;
+    tdDim.addEventListener('input', () => { item.dim = tdDim.textContent; saveItems(); });
+    tr.appendChild(tdDim);
+
+    const tdQte = document.createElement('td'); tdQte.contentEditable = true; tdQte.textContent = item.qte;
+    tdQte.addEventListener('input', () => { item.qte = tdQte.textContent; saveItems(); });
+    tr.appendChild(tdQte);
+
+    const tdPrix = document.createElement('td'); tdPrix.className = 'price-cell';
+    const inputPrix = document.createElement('input');
+    inputPrix.type = 'number'; inputPrix.step = '0.01'; inputPrix.min = '0'; inputPrix.value = item.prix; inputPrix.placeholder = '0';
+    inputPrix.addEventListener('input', () => { item.prix = inputPrix.value; saveItems(); updateTotal(); });
+    tdPrix.appendChild(inputPrix); tr.appendChild(tdPrix);
+
+    const tdObs = document.createElement('td'); tdObs.contentEditable = true; tdObs.textContent = item.obs;
+    tdObs.addEventListener('input', () => { item.obs = tdObs.textContent; saveItems(); });
+    tr.appendChild(tdObs);
+
+    const tdRem = document.createElement('td'); tdRem.contentEditable = true; tdRem.textContent = item.rem;
+    tdRem.addEventListener('input', () => { item.rem = tdRem.textContent; saveItems(); });
+    tr.appendChild(tdRem);
+
+    const tdDel = document.createElement('td');
+    const btnDel = document.createElement('button'); btnDel.className = 'btn-delete-row'; btnDel.textContent = '🗑️';
+    btnDel.addEventListener('click', () => { items.splice(i, 1); saveItems(); renderTable(); });
+    tdDel.appendChild(btnDel); tr.appendChild(tdDel);
+
+    tbody.appendChild(tr);
+  });
+  updateTotal();
+}
+
+function updateTotal() {
+  let total = 0;
+  items.forEach(item => { const val = parseFloat(item.prix); if (!isNaN(val)) total += val; });
+  document.getElementById('totalPrice').textContent = total.toFixed(2) + ' €';
+}
+
+function addRow() {
+  items.push({ checked: false, nom: '', dim: '', qte: '', prix: '', obs: '', rem: '' });
+  saveItems(); renderTable();
+  const rows = document.querySelectorAll('#tbody tr');
+  if (rows.length > 0) rows[rows.length - 1].querySelectorAll('td')[1].focus();
+}
+
+function resetItems() {
+  if (confirm('Réinitialiser la liste aux valeurs par défaut ?')) {
+    localStorage.removeItem('sdb_items');
+    items = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+    renderTable();
+  }
+}
+
+function exportCSV() {
+  let csv = 'Nom;Dimension;Quantites;Prix;Coche;Observation;Remarque\n';
+  items.forEach(item => {
+    const check = item.checked ? 'X' : '';
+    const prix = item.prix || '';
+    csv += `"${item.nom}";"${item.dim}";"${item.qte}";${prix};${check};"${item.obs}";"${item.rem}"\n`;
+  });
+  let total = 0; items.forEach(item => { const val = parseFloat(item.prix); if (!isNaN(val)) total += val; });
+  csv += `;;;;;;;\nTOTAL;;;;;${total.toFixed(2)};;;`;
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'liste_achats.csv'; link.click();
+}
+
+renderTable();
+
+// Enregistrement du Service Worker pour le mode hors-ligne
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
+}
+</script>
+</body>
+</html>
