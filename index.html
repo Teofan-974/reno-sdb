@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#6d4aff">
-<meta name="description" content="Liste d'achats Carrelage Salle de Bain">
-<link rel="manifest" href="manifest.json">
-<title>Liste d'Achats — Carrelage Salle de Bain</title>
+<title>Liste d'Achats & Budget — Carrelage Salle de Bain</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -16,47 +13,167 @@
     padding: 20px;
   }
   h1 { text-align: center; font-size: 24px; margin-bottom: 5px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 30px 0 10px 0; color: #1d1d1f; }
   .subtitle { text-align: center; color: #6e6e73; font-size: 14px; margin-bottom: 25px; }
-  .toolbar { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
-  .toolbar button { background: #6d4aff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+
+  .toolbar {
+    display: flex; gap: 10px; justify-content: center;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .toolbar button {
+    background: #6d4aff; color: white; border: none;
+    padding: 10px 20px; border-radius: 8px;
+    font-size: 14px; cursor: pointer; transition: opacity 0.2s;
+  }
   .toolbar button:hover { opacity: 0.85; }
   .toolbar button.add { background: #34c759; }
-  .toolbar button.del { background: #ff3b30; }
-  .toolbar button.reset { background: #8e8e93; }
-  .table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+
+  .section-title {
+    font-size: 18px; font-weight: 600;
+    margin: 30px 0 10px 0; color: #1d1d1f;
+  }
+
+  .table-container {
+    overflow-x: auto; background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
   table { width: 100%; border-collapse: collapse; min-width: 800px; }
-  th { background: #6d4aff; color: white; padding: 12px 10px; text-align: left; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
-  td { padding: 8px 10px; border-bottom: 1px solid #e5e5ea; font-size: 14px; vertical-align: middle; }
+  th {
+    background: #6d4aff; color: white;
+    padding: 12px 10px; text-align: left;
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  td {
+    padding: 8px 10px; border-bottom: 1px solid #e5e5ea;
+    font-size: 14px; vertical-align: middle;
+  }
   tr:last-child td { border-bottom: none; }
   tr:nth-child(even) { background: #fafafa; }
   tr:hover { background: #f0eff6; }
-  td[contenteditable="true"]:focus { outline: 2px solid #6d4aff; outline-offset: -2px; background: #fff; }
+
+  td[contenteditable="true"]:focus {
+    outline: 2px solid #6d4aff;
+    outline-offset: -2px; background: #fff;
+  }
+
   td.check-cell { text-align: center; width: 50px; }
-  td.check-cell input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #6d4aff; }
+  td.check-cell input[type="checkbox"] {
+    width: 20px; height: 20px; cursor: pointer; accent-color: #6d4aff;
+  }
   tr.checked td { opacity: 0.45; text-decoration: line-through; }
-  td.price-cell input { width: 80px; border: 1px solid #d1d1d6; border-radius: 6px; padding: 4px 6px; font-size: 14px; }
+
+  td.price-cell input {
+    width: 80px; border: 1px solid #d1d1d6;
+    border-radius: 6px; padding: 4px 6px; font-size: 14px;
+  }
   td.price-cell input:focus { outline: none; border-color: #6d4aff; }
-  .total-row td { font-weight: 700; font-size: 16px; background: #ede9fe; border-top: 2px solid #6d4aff; }
+
+  .total-row td {
+    font-weight: 700; font-size: 16px;
+    background: #ede9fe; border-top: 2px solid #6d4aff;
+  }
   .total-price { color: #6d4aff; font-size: 18px; }
-  .btn-delete-row { background: none; border: none; color: #ff3b30; font-size: 18px; cursor: pointer; opacity: 0.5; }
+
+  .btn-delete-row {
+    background: none; border: none; color: #ff3b30;
+    font-size: 18px; cursor: pointer; opacity: 0.5;
+  }
   .btn-delete-row:hover { opacity: 1; }
-  .save-indicator { position: fixed; bottom: 20px; right: 20px; background: #34c759; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
-  .save-indicator.show { opacity: 1; }
-  @media (max-width: 600px) { body { padding: 10px; } th, td { font-size: 12px; padding: 6px 4px; } }
+
+  /* Budget */
+  .budget-table { min-width: 500px; }
+  .budget-table th { background: #34c759; }
+  .budget-table td { font-size: 14px; }
+  .budget-table .surface-val { font-weight: 600; color: #6e6e73; }
+  .budget-table input[type="number"] {
+    width: 90px; border: 1px solid #d1d1d6;
+    border-radius: 6px; padding: 4px 6px; font-size: 14px;
+  }
+  .budget-table input[type="number"]:focus { outline: none; border-color: #34c759; }
+  .budget-total-row td {
+    font-weight: 700; font-size: 16px;
+    background: #e8f8ed; border-top: 2px solid #34c759;
+  }
+  .budget-total-price { color: #34c759; font-size: 18px; }
+
+  .grand-total {
+    margin-top: 20px;
+    background: linear-gradient(135deg, #6d4aff, #8b6dff);
+    color: white; padding: 20px;
+    border-radius: 12px; text-align: center;
+    font-size: 18px; font-weight: 700;
+  }
+  .grand-total span { font-size: 28px; display: block; margin-top: 5px; }
+
+  /* Plan de découpe */
+  .cut-plan {
+    background: white; border-radius: 12px;
+    padding: 25px; box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
+  .cut-grid-wrapper {
+    display: flex; justify-content: center; margin: 20px 0;
+  }
+  .cut-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 140px);
+    grid-template-rows: repeat(4, auto);
+    gap: 3px; border: 3px solid #6d4aff;
+    padding: 3px; border-radius: 4px;
+    background: #6d4aff;
+  }
+  .cut-grid > div {
+    background: #f5f5f7; padding: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; text-align: center;
+    border-radius: 2px; min-height: 60px;
+    word-break: break-word;
+  }
+  .cut-grid > div.has-cut {
+    background: #fff3cd; border: 2px dashed #ffc107;
+  }
+  .cut-grid > div.full {
+    background: #d4edda; border: 2px solid #28a745;
+  }
+  .cut-grid > div.bonde {
+    background: #6d4aff; color: white;
+    font-weight: bold; border: 2px solid #5a3df0;
+  }
+  .cut-legend {
+    display: flex; gap: 20px; justify-content: center;
+    flex-wrap: wrap; margin-top: 15px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch {
+    width: 20px; height: 20px; border-radius: 4px; display: inline-block;
+  }
+
+  .cut-detail-table th { background: #ff9500; }
+  .cut-detail-table { min-width: 600px; }
+
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    th, td { font-size: 12px; padding: 6px 4px; }
+    .cut-grid { grid-template-columns: repeat(2, 100px); }
+  }
 </style>
 </head>
 <body>
 
-<h1>📋 Liste d'Achats — Carrelage Salle de Bain</h1>
-<p class="subtitle">Cliquez sur une cellule pour la modifier • Cochez les articles achetés • Sauvegarde automatique</p>
+<h1>📋 Carrelage Salle de Bain — Liste d'Achats & Budget</h1>
+<p class="subtitle">Sol 45×45 • Murs 30×60 • Plan de découpe douche italienne</p>
 
 <div class="toolbar">
   <button onclick="addRow()" class="add">➕ Ajouter une ligne</button>
   <button onclick="exportCSV()">💾 Exporter en CSV</button>
   <button onclick="window.print()">🖨️ Imprimer</button>
-  <button onclick="resetItems()" class="reset">↺ Réinitialiser</button>
 </div>
 
+<!-- ===== LISTE D'ACHATS ===== -->
+<h2>🛒 Liste d'achats</h2>
 <div class="table-container">
   <table id="shoppingTable">
     <thead>
@@ -82,32 +199,177 @@
   </table>
 </div>
 
-<div class="save-indicator" id="saveIndicator">💾 Sauvegardé</div>
+<!-- ===== PLAN DE DÉCOUPE DOUCHE ===== -->
+<h2>✂️ Plan de découpe — Douche italienne (140 × 90)</h2>
+<div class="cut-plan">
+  <p style="margin-bottom:15px;">
+    Carreaux <strong>45×45 cm</strong> • Bonde <strong>15×15 cm</strong> positionnée à <strong>30 cm de la paroi de 90</strong>, centrée dans la largeur.
+  </p>
+
+  <div class="cut-grid-wrapper">
+    <div class="cut-grid">
+      <!-- Rangée 1 (0–45 cm) : contient la bonde -->
+      <div class="has-cut" title="Carreau A">
+        <strong>A</strong><br>Découpe angle<br>bas-droit<br>7,5 × 15 cm
+      </div>
+      <div class="has-cut" title="Carreau B">
+        <strong>B</strong><br>Découpe angle<br>bas-gauche<br>7,5 × 15 cm
+      </div>
+      <!-- Rangée 2 (45–90 cm) -->
+      <div class="full" title="Carreau entier">
+        <strong>C</strong><br>Carreau entier<br>45 × 45
+      </div>
+      <div class="full" title="Carreau entier">
+        <strong>D</strong><br>Carreau entier<br>45 × 45
+      </div>
+      <!-- Rangée 3 (90–135 cm) -->
+      <div class="full" title="Carreau entier">
+        <strong>E</strong><br>Carreau entier<br>45 × 45
+      </div>
+      <div class="full" title="Carreau entier">
+        <strong>F</strong><br>Carreau entier<br>45 × 45
+      </div>
+      <!-- Rangée 4 (135–140 cm = coupe 5 cm) -->
+      <div class="has-cut" title="Carreau C (coupe)">
+        <strong>G</strong><br>Coupe bande<br>45 × 5 cm
+      </div>
+      <div class="has-cut" title="Carreau D (coupe)">
+        <strong>H</strong><br>Coupe bande<br>45 × 5 cm
+      </div>
+    </div>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#6e6e73; margin-bottom:10px;">
+    ↑ Paroi vitrée 140×200 (fixée sur mur 90) — bonde à 30 cm
+  </p>
+
+  <div class="cut-legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#d4edda;border:2px solid #28a745;"></span> Carreau entier (45×45)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#fff3cd;border:2px dashed #ffc107;"></span> Carreau avec découpe</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#6d4aff;"></span> Bonde 15×15</div>
+  </div>
+
+  <h3 style="margin-top:25px; margin-bottom:10px;">Détail des découpes</h3>
+  <div class="table-container">
+    <table class="cut-detail-table">
+      <thead>
+        <tr>
+          <th>Repère</th>
+          <th>Position</th>
+          <th>Type de découpe</th>
+          <th>Dimensions</th>
+          <th>Remarque</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>A</strong></td>
+          <td>Rangée 1 gauche</td>
+          <td>Carré angle bas-droit</td>
+          <td>7,5 × 15 cm</td>
+          <td>Moitié gauche de la bonde (37,5→45 cm largeur / 30→45 cm longueur)</td>
+        </tr>
+        <tr>
+          <td><strong>B</strong></td>
+          <td>Rangée 1 droite</td>
+          <td>Carré angle bas-gauche</td>
+          <td>7,5 × 15 cm</td>
+          <td>Moitié droite de la bonde (45→52,5 cm / 30→45 cm longueur)</td>
+        </tr>
+        <tr>
+          <td><strong>G</strong></td>
+          <td>Rangée 4 gauche</td>
+          <td>Bande horizontale</td>
+          <td>45 × 5 cm</td>
+          <td>Comble le reste de 140−135 = 5 cm</td>
+        </tr>
+        <tr>
+          <td><strong>H</strong></td>
+          <td>Rangée 4 droite</td>
+          <td>Bande horizontale</td>
+          <td>45 × 5 cm</td>
+          <td>Comble le reste de 140−135 = 5 cm</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:25px; margin-bottom:10px;">📐 Profil de pente — vers la bonde</h3>
+  <p style="font-size:14px; margin-bottom:10px;">
+    La pente est créée dans le <strong>mortier de pente</strong> (ou receveur prêt-à-carreler), pas dans le carrelage.
+    Les carreaux sont posés à plat sur le support incliné.
+  </p>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Zone</th>
+          <th>Distance depuis la paroi</th>
+          <th>Flèche (pente 1,5%)</th>
+          <th>Action mortier</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Paroi (entrée)</td><td>0 cm</td><td>+0,45 cm</td><td>Mortier légèrement plus épais</td></tr>
+        <tr style="background:#ede9fe;"><td><strong>Bonde (point bas)</strong></td><td><strong>30 cm</strong></td><td><strong>0 cm (référence)</strong></td><td><strong>Mortier au plus fin</strong></td></tr>
+        <tr><td>Fond de douche</td><td>140 cm</td><td>+1,65 cm</td><td>Mortier plus épais au fond</td></tr>
+        <tr><td>Murs latéraux</td><td>45 cm de chaque côté</td><td>+0,68 cm</td><td>Mortier plus épais sur les bords latéraux</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== BUDGET CARRELAGE ===== -->
+<h2>💰 Estimation du coût carrelage</h2>
+<div class="table-container">
+  <table class="budget-table">
+    <thead>
+      <tr>
+        <th>Zone</th>
+        <th>Surface (m²)</th>
+        <th>Prix au m² (€)</th>
+        <th>Coût estimé (€)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sol 45×45 (SDB + douche)</td>
+        <td class="surface-val">9,11</td>
+        <td><input type="number" id="prixSol" step="0.01" min="0" value="20" onchange="updateBudget()"></td>
+        <td id="coutSol">182,20 €</td>
+      </tr>
+      <tr>
+        <td>Murs douche 30×60 (2 pans)</td>
+        <td class="surface-val">6,84</td>
+        <td><input type="number" id="prixMurs" step="0.01" min="0" value="20" onchange="updateBudget()"></td>
+        <td id="coutMurs">136,80 €</td>
+      </tr>
+      <tr class="budget-total-row">
+        <td>TOTAL CARRELAGE</td>
+        <td class="surface-val">15,95</td>
+        <td></td>
+        <td class="budget-total-price" id="coutCarrelageTotal">319,00 €</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== GRAND TOTAL ===== -->
+<div class="grand-total" id="grandTotal">
+  💵 BUDGET GLOBAL ESTIMÉ
+  <span id="grandTotalValue">—</span>
+</div>
 
 <script>
-const DEFAULT_ITEMS = [
-  { checked: false, nom: "Carrelage sol 30×60", dim: "30×60 cm", qte: "50 carreaux", prix: "", obs: "Lot identique — vérifier teinte avant pose", rem: "Surface 9,00 m² — waste 10%" },
-  { checked: false, nom: "Carrelage mur douche 30×60", dim: "30×60 cm", qte: "38 carreaux", prix: "", obs: "Vérifier cohérence teinte avec sol", rem: "Surface 6,84 m² — waste 15%" },
-  { checked: false, nom: "Colle C2TE S1 flexible", dim: "Sac 25 kg", qte: "3 sacs", prix: "", obs: "Classe C2TE S1 obligatoire zone humide", rem: "~5 kg/m² — conso. 13,72 m² total" },
-  { checked: false, nom: "Joint hydrofuge", dim: "5 kg + 2 kg", qte: "7 kg", prix: "", obs: "Résistant moisissures — couleur au choix", rem: "Joint 2-3 mm — ~0,4 kg/m²" },
-  { checked: false, nom: "Enduit imperméabilisation", dim: "Kit 5 kg", qte: "1 kit", prix: "", obs: "2 couches — sol + remontée murs 10 cm", rem: "Surface à étancher ~1,72 m²" },
-  { checked: false, nom: "Bande renfort angle interne", dim: "~30×30 cm", qte: "2 pièces", prix: "", obs: "À noyer dans 1ʳᵉ couche enduit", rem: "Pour les 2 angles internes du coin douche" },
-  { checked: false, nom: "Profilé U fixation paroi", dim: "2 m", qte: "1 barre", prix: "", obs: "Vérifier épaisseur verre (8 ou 10 mm)", rem: "Paroi 140×200 cm — à sceller avant carrelage" }
+const items = [
+  { checked:false, nom:"Carrelage sol 45×45", dim:"45×45 cm", qte:"45 carreaux", prix:"", obs:"Lot identique — vérifier teinte avant pose", rem:"Surface 9,11 m² — waste 10% — SDB + douche" },
+  { checked:false, nom:"Carrelage mur douche 30×60", dim:"30×60 cm", qte:"38 carreaux", prix:"", obs:"Vérifier cohérence teinte avec sol", rem:"Surface 6,84 m² — waste 15% — 2 pans 140+90" },
+  { checked:false, nom:"Colle C2TE S1 flexible", dim:"Sac 25 kg", qte:"3 sacs", prix:"", obs:"Classe C2TE S1 obligatoire zone humide", rem:"~5 kg/m² — conso. 13,72 m² total" },
+  { checked:false, nom:"Joint hydrofuge", dim:"5 kg + 2 kg", qte:"7 kg", prix:"", obs:"Résistant moisissures — couleur au choix", rem:"Joint 2-3 mm — ~0,4 kg/m²" },
+  { checked:false, nom:"Enduit imperméabilisation", dim:"Kit 5 kg", qte:"1 kit", prix:"", obs:"2 couches — sol + remontée murs 10 cm", rem:"Surface à étancher ~1,72 m²" },
+  { checked:false, nom:"Bande renfort angle interne", dim:"~30×30 cm", qte:"2 pièces", prix:"", obs:"À noyer dans 1ʳᵉ couche enduit", rem:"Pour les 2 angles internes du coin douche" },
+  { checked:false, nom:"Profilé U fixation paroi", dim:"2 m", qte:"1 barre", prix:"", obs:"Vérifier épaisseur verre (8 ou 10 mm)", rem:"Paroi 140×200 — à sceller avant carrelage" }
 ];
-
-let items = JSON.parse(localStorage.getItem('sdb_items')) || JSON.parse(JSON.stringify(DEFAULT_ITEMS));
-
-function saveItems() {
-  localStorage.setItem('sdb_items', JSON.stringify(items));
-  showSaveIndicator();
-}
-
-function showSaveIndicator() {
-  const indicator = document.getElementById('saveIndicator');
-  indicator.classList.add('show');
-  clearTimeout(showSaveIndicator._timer);
-  showSaveIndicator._timer = setTimeout(() => { indicator.classList.remove('show'); }, 1200);
-}
 
 function renderTable() {
   const tbody = document.getElementById('tbody');
@@ -116,40 +378,51 @@ function renderTable() {
     const tr = document.createElement('tr');
     if (item.checked) tr.classList.add('checked');
 
-    const tdCheck = document.createElement('td'); tdCheck.className = 'check-cell';
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = item.checked;
-    cb.addEventListener('change', () => { item.checked = cb.checked; saveItems(); renderTable(); });
+    const tdCheck = document.createElement('td');
+    tdCheck.className = 'check-cell';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = item.checked;
+    cb.addEventListener('change', () => { item.checked = cb.checked; renderTable(); });
     tdCheck.appendChild(cb); tr.appendChild(tdCheck);
 
-    const tdNom = document.createElement('td'); tdNom.contentEditable = true; tdNom.textContent = item.nom;
-    tdNom.addEventListener('input', () => { item.nom = tdNom.textContent; saveItems(); });
+    const tdNom = document.createElement('td');
+    tdNom.contentEditable = true; tdNom.textContent = item.nom;
+    tdNom.addEventListener('input', () => item.nom = tdNom.textContent);
     tr.appendChild(tdNom);
 
-    const tdDim = document.createElement('td'); tdDim.contentEditable = true; tdDim.textContent = item.dim;
-    tdDim.addEventListener('input', () => { item.dim = tdDim.textContent; saveItems(); });
+    const tdDim = document.createElement('td');
+    tdDim.contentEditable = true; tdDim.textContent = item.dim;
+    tdDim.addEventListener('input', () => item.dim = tdDim.textContent);
     tr.appendChild(tdDim);
 
-    const tdQte = document.createElement('td'); tdQte.contentEditable = true; tdQte.textContent = item.qte;
-    tdQte.addEventListener('input', () => { item.qte = tdQte.textContent; saveItems(); });
+    const tdQte = document.createElement('td');
+    tdQte.contentEditable = true; tdQte.textContent = item.qte;
+    tdQte.addEventListener('input', () => item.qte = tdQte.textContent);
     tr.appendChild(tdQte);
 
-    const tdPrix = document.createElement('td'); tdPrix.className = 'price-cell';
+    const tdPrix = document.createElement('td');
+    tdPrix.className = 'price-cell';
     const inputPrix = document.createElement('input');
-    inputPrix.type = 'number'; inputPrix.step = '0.01'; inputPrix.min = '0'; inputPrix.value = item.prix; inputPrix.placeholder = '0';
-    inputPrix.addEventListener('input', () => { item.prix = inputPrix.value; saveItems(); updateTotal(); });
+    inputPrix.type = 'number'; inputPrix.step = '0.01'; inputPrix.min = '0';
+    inputPrix.value = item.prix; inputPrix.placeholder = '0';
+    inputPrix.addEventListener('input', () => { item.prix = inputPrix.value; updateTotal(); });
     tdPrix.appendChild(inputPrix); tr.appendChild(tdPrix);
 
-    const tdObs = document.createElement('td'); tdObs.contentEditable = true; tdObs.textContent = item.obs;
-    tdObs.addEventListener('input', () => { item.obs = tdObs.textContent; saveItems(); });
+    const tdObs = document.createElement('td');
+    tdObs.contentEditable = true; tdObs.textContent = item.obs;
+    tdObs.addEventListener('input', () => item.obs = tdObs.textContent);
     tr.appendChild(tdObs);
 
-    const tdRem = document.createElement('td'); tdRem.contentEditable = true; tdRem.textContent = item.rem;
-    tdRem.addEventListener('input', () => { item.rem = tdRem.textContent; saveItems(); });
+    const tdRem = document.createElement('td');
+    tdRem.contentEditable = true; tdRem.textContent = item.rem;
+    tdRem.addEventListener('input', () => item.rem = tdRem.textContent);
     tr.appendChild(tdRem);
 
     const tdDel = document.createElement('td');
-    const btnDel = document.createElement('button'); btnDel.className = 'btn-delete-row'; btnDel.textContent = '🗑️';
-    btnDel.addEventListener('click', () => { items.splice(i, 1); saveItems(); renderTable(); });
+    const btnDel = document.createElement('button');
+    btnDel.className = 'btn-delete-row'; btnDel.textContent = '🗑️';
+    btnDel.title = 'Supprimer cette ligne';
+    btnDel.addEventListener('click', () => { items.splice(i, 1); renderTable(); });
     tdDel.appendChild(btnDel); tr.appendChild(tdDel);
 
     tbody.appendChild(tr);
@@ -159,23 +432,48 @@ function renderTable() {
 
 function updateTotal() {
   let total = 0;
-  items.forEach(item => { const val = parseFloat(item.prix); if (!isNaN(val)) total += val; });
+  items.forEach(item => {
+    const val = parseFloat(item.prix);
+    if (!isNaN(val)) total += val;
+  });
   document.getElementById('totalPrice').textContent = total.toFixed(2) + ' €';
+  updateGrandTotal();
+}
+
+function updateBudget() {
+  const surfaceSol = 9.11;
+  const surfaceMurs = 6.84;
+  const prixSol = parseFloat(document.getElementById('prixSol').value) || 0;
+  const prixMurs = parseFloat(document.getElementById('prixMurs').value) || 0;
+
+  const coutSol = surfaceSol * prixSol;
+  const coutMurs = surfaceMurs * prixMurs;
+  const totalCarrelage = coutSol + coutMurs;
+
+  document.getElementById('coutSol').textContent = coutSol.toFixed(2) + ' €';
+  document.getElementById('coutMurs').textContent = coutMurs.toFixed(2) + ' €';
+  document.getElementById('coutCarrelageTotal').textContent = totalCarrelage.toFixed(2) + ' €';
+
+  if (items.length > 0 && !items[0].prix) items[0].prix = coutSol.toFixed(2);
+  if (items.length > 1 && !items[1].prix) items[1].prix = coutMurs.toFixed(2);
+
+  updateGrandTotal();
+}
+
+function updateGrandTotal() {
+  let totalListe = 0;
+  items.forEach(item => {
+    const val = parseFloat(item.prix);
+    if (!isNaN(val)) totalListe += val;
+  });
+  document.getElementById('grandTotalValue').textContent = totalListe.toFixed(2) + ' €';
 }
 
 function addRow() {
-  items.push({ checked: false, nom: '', dim: '', qte: '', prix: '', obs: '', rem: '' });
-  saveItems(); renderTable();
+  items.push({ checked:false, nom:'', dim:'', qte:'', prix:'', obs:'', rem:'' });
+  renderTable();
   const rows = document.querySelectorAll('#tbody tr');
   if (rows.length > 0) rows[rows.length - 1].querySelectorAll('td')[1].focus();
-}
-
-function resetItems() {
-  if (confirm('Réinitialiser la liste aux valeurs par défaut ?')) {
-    localStorage.removeItem('sdb_items');
-    items = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
-    renderTable();
-  }
 }
 
 function exportCSV() {
@@ -185,18 +483,19 @@ function exportCSV() {
     const prix = item.prix || '';
     csv += `"${item.nom}";"${item.dim}";"${item.qte}";${prix};${check};"${item.obs}";"${item.rem}"\n`;
   });
-  let total = 0; items.forEach(item => { const val = parseFloat(item.prix); if (!isNaN(val)) total += val; });
-  csv += `;;;;;;;\nTOTAL;;;;;${total.toFixed(2)};;;`;
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'liste_achats.csv'; link.click();
+  let total = 0;
+  items.forEach(item => { const v = parseFloat(item.prix); if(!isNaN(v)) total+=v; });
+  csv += `;;;;;;;\n` + `"TOTAL";"";"";${total.toFixed(2)};"";"";""`;
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'liste_achats.csv';
+  link.click();
 }
 
 renderTable();
-
-// Enregistrement du Service Worker pour le mode hors-ligne
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
-}
+updateBudget();
 </script>
+
 </body>
 </html>
